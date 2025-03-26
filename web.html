@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Registration</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        #qrcode {
+            margin: 20px auto;
+            max-width: 200px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+        }
+        #location-permission {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="qr-section">
+        <h2>Scan QR Code to Register</h2>
+        <div id="qrcode"></div>
+    </div>
+
+    <div id="registration-form" style="display:none;">
+        <h2>Registration Form</h2>
+        <form id="regForm">
+            <input type="text" name="name" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="tel" name="phone" placeholder="Phone Number">
+            
+            <div id="location-permission">
+                <h3>Location Permission</h3>
+                <p>Allow us to access your location?</p>
+                <button type="button" onclick="requestLocation()">Allow Location Access</button>
+            </div>
+
+            <button type="submit">Submit Registration</button>
+        </form>
+    </div>
+
+    <script>
+        function generateQR() {
+            const qr = qrcode(0, 'M');
+            qr.addData(window.location.href + '?register=true');
+            qr.make();
+            document.getElementById('qrcode').innerHTML = qr.createImgTag(5);
+        }
+
+        function checkRegistrationLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('register') === 'true') {
+                document.getElementById('qr-section').style.display = 'none';
+                document.getElementById('registration-form').style.display = 'block';
+            }
+        }
+
+        function requestLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        alert('Location Access Granted!\n' + 
+                              'Latitude: ' + position.coords.latitude + '\n' + 
+                              'Longitude: ' + position.coords.longitude);
+                    },
+                    function(error) {
+                        alert('Location Access Denied: ' + error.message);
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        document.getElementById('regForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            alert('Registration Submitted!\n' + 
+                  'Name: ' + data.name + '\n' + 
+                  'Email: ' + data.email + '\n' + 
+                  'Phone: ' + (data.phone || 'Not provided'));
+        });
+
+        generateQR();
+        checkRegistrationLink();
+    </script>
+</body>
+</html>
+
